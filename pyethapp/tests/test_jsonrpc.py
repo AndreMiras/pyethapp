@@ -77,10 +77,18 @@ def test_compile_solidity():
     with open(path.join(path.dirname(__file__), 'contracts', 'multiply.sol')) as handler:
         solidity_code = handler.read()
 
-    solidity = ethereum._solidity.get_solidity()  # pylint: disable=protected-access
-
-    abi = solidity.mk_full_signature(solidity_code)
-    code = data_encoder(solidity.compile(solidity_code))
+    filepath = None
+    contract_name = 'test'
+    compiled = _solidity.compile_code(
+        solidity_code,
+        combined='bin,abi')
+    # well it seems we could also access it directly using:
+    # compiled['test']['abi']
+    abi = _solidity.solidity_get_contract_data(compiled, filepath, contract_name)['abi']
+    # compiled['test']['bin_hex']
+    code = _solidity.solidity_get_contract_data(compiled, filepath, contract_name)['bin_hex']
+    # add the "0x" prefix to keep consistency with compileSolidity()
+    code = "0x" + code
 
     info = {
         'abiDefinition': abi,

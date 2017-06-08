@@ -169,14 +169,19 @@ def test_console_name_reg_contract(test_app):
     }
     """
 
-    import ethereum.tools._solidity
-    solidity = ethereum.tools._solidity.get_solidity()
+    from ethereum.tools import _solidity
+    solidity = _solidity.get_solidity()
     if solidity is None:
         pytest.xfail("solidity not installed, not tested")
     else:
         # create the NameReg contract
         tx_to = b''
-        evm_code = solidity.compile(solidity_code)
+        filepath = None
+        contract_name = 'NameReg'
+        compiled = _solidity.compile_code(
+            solidity_code,
+            combined='bin,abi')
+        evm_code = _solidity.solidity_get_contract_data(compiled, filepath, contract_name)['bin']
         chainservice = test_app.services.chain
         chain = test_app.services.chain.chain
         hc_state = State(chainservice.head_candidate.state_root, chain.env)
@@ -200,7 +205,7 @@ def test_console_name_reg_contract(test_app):
         assert code != '0x'
 
         # interact with the NameReg contract
-        abi = solidity.mk_full_signature(solidity_code)
+        abi = _solidity.solidity_get_contract_data(compiled, filepath, contract_name)['abi']
         namereg = eth.new_contract(abi, creates, sender=sender)
 
         register_tx = namereg.register('alice', startgas=90000, gasprice=50 * 10**9)
