@@ -3,7 +3,7 @@ from builtins import str
 from past.utils import old_div
 import json
 from uuid import uuid4
-import ethereum.tools.keys
+import eth_keyfile.keyfile
 from ethereum.tools.keys import privtoaddr
 from ethereum.transactions import Transaction
 from ethereum.utils import (
@@ -14,7 +14,10 @@ from pyethapp.accounts import Account
 import pytest
 
 # reduce key derivation iterations
-ethereum.tools.keys.PBKDF2_CONSTANTS['c'] = 100
+def get_default_work_factor_for_kdf(kdf):
+    return 100
+eth_keyfile.keyfile.get_default_work_factor_for_kdf = \
+    get_default_work_factor_for_kdf
 
 
 @pytest.fixture()

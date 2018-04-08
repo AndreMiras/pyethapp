@@ -2,6 +2,7 @@ from builtins import hex
 from builtins import object
 import json
 import os
+import eth_keyfile
 from random import SystemRandom
 import shutil
 from uuid import UUID
@@ -74,7 +75,7 @@ class Account(object):
         if not is_string(password):
             password = to_string(password)
 
-        keystore = keys.make_keystore_json(key, password)
+        keystore = eth_keyfile.create_keyfile_json(key, password)
         keystore['id'] = uuid
         return Account(keystore, password, path)
 
@@ -121,7 +122,9 @@ class Account(object):
                  account is locked)
         """
         if self.locked:
-            self._privkey = keys.decode_keystore_json(self.keystore, password)
+            if not is_string(password):
+                password = to_string(password)
+            self._privkey = eth_keyfile.decode_keyfile_json(self.keystore, password)
             self.locked = False
             self.address  # get address such that it stays accessible after a subsequent lock
 
